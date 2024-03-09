@@ -1,0 +1,7 @@
+If you don't want to set title and need to set artist
+Please use command like this "*!bot mp3 _https://youtu.be/example_ - Skyo*"
+
+*Variable*:"
+*URL*: Youtube video URL"
+*Title*: Filename for audio, Default: Video title from youtube"
+*Artist*: Artist for audio, Default: Unknown"
