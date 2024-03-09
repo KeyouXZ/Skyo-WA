@@ -17,7 +17,7 @@ client.on("message", async (message) => {
     // Args
     // const args = message.body.slice(prefix?.length).trim().split(/ +/g);
     const regex = /"([^"]+)"|\S+/g;
-    const args = message.body.slice(prefix.length).match(regex);
+    const args = message.body.slice(prefix?.length).match(regex);
 
     // Commands 1
     const cmd = args.shift().toLowerCase();
