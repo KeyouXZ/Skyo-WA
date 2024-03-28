@@ -4,8 +4,9 @@ const { userSchema } = require("../database/schema")
 const timestamp = new Date().toLocaleString("en-US", { hour12: false }).replace(",", "");
 
 const database = {
-    createUser: async function (ID, name, password) {
-        const user = new userSchema({ ID }, name, password)
+    createUser: async function (ID, name, username, password) {
+        const user = new userSchema({ ID }, name, username, password);
+        await user.save();
         return console.log(chalk.gray(`[${timestamp}]`), chalk.blue.bold(`INFO`), `User with ID ${ID} has been created`);
     },
     get: async function (ID) {

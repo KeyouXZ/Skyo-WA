@@ -34,7 +34,7 @@ const headers = (client, cmd) => {
     
     const cooldown = command.cooldown
     if (cooldown) {
-        text+="*Cooldown:* " + cooldown + " Second\n\n"
+        text+="*Cooldown:* " + cooldown + " Second"
     }
     
     return text

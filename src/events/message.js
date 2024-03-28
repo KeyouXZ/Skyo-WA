@@ -7,8 +7,10 @@ const prefixes = client.prefix;
 client.userState = new Map();
 
 client.on("message", async (message) => {
+    // Chat
+    const chat = await message.getChat();
     // Number
-    const number = await message.getMentions().number
+    const number = await chat.lastMessage.from.replace("@c.us", "");
 
     // Prefixes
     const prefix = prefixes.find(p => message.body.startsWith(p));
@@ -16,16 +18,18 @@ client.on("message", async (message) => {
 
     // Args
     // const args = message.body.slice(prefix?.length).trim().split(/ +/g);
-    const regex = /"([^"]+)"|\S+/g;
-    const args = message.body.slice(prefix?.length).match(regex);
+    const regex = /"([^"]*)"|\S+/g;
+    const args = [];
+    let match;
+
+    while ((match = regex.exec(message.body.slice(prefix?.length))) !== null) {
+        args.push(match[1] || match[0]);
+    }
 
     // Commands 1
     const cmd = args.shift().toLowerCase();
     if (cmd.length == 0) return;
     let command = client.commands.get(cmd);
-
-    // Define chat
-    const chat = await message.getChat();
 
     // Chat Bot
     if (client.userState.has(number)) {
@@ -39,13 +43,14 @@ client.on("message", async (message) => {
                 }
             } else {
 
-                // Request to brainshop
-                const bid = '180584';
-                const key = "le2O9v0frYI972vH";
-                const uid = await number
+                const cai_api = process.env.CAI_API;
+		const cai_password = process.env.CAI_PASSWORD;
+		const cai_message = message.body;
                 
-                await axios.get(`http://api.brainshop.ai/get?bid=${bid}&key=${key}&uid=${uid}&msg=${encodeURIComponent(message.body)}`).then(async response => {
-                    return await chat.sendMessage(response.data.cnt);
+                await axios.post(cai_api, {password: cai_password, message: cai_message}).then(async response => {
+		    let result = response.data.text
+		    if (result.includes("```")) result.replace("```", "")
+                    return await chat.sendMessage(result);
                 })
             }
         }

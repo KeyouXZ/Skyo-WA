@@ -9,7 +9,8 @@ require("dotenv").config();
 const client = new Client({
     // Save whatsapp session
     authStrategy: new LocalAuth({
-        dataPath: './local/auth'
+        dataPath: './local/auth',
+        clientId: "client"
     }),
     // Using pairing code for linking
     linkingMethod: new LinkingMethod({
@@ -18,8 +19,9 @@ const client = new Client({
         }
     }),
     puppeteer: {
-        args: ['--no-sandbox']
-    }
+        headless: true,
+        executablePath: '/usr/bin/google-chrome-stable'
+    },
 });
 
 // Define some variable

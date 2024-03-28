@@ -1,7 +1,7 @@
 module.exports = {
     name: "bot",
     run: async (client, message, args, chat) => {
-        const number = await message.getMentions().number;
+        const number = await chat.lastMessage.from.replace("@c.us", "");
 
         const state = client.userState.get(number)
 

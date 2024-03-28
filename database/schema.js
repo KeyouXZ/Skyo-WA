@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const user = new mongoose.Schema({
     // Login information
     ID: {
         type: Number,
@@ -10,11 +10,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    username: {
+        type: String
+    },
     password: {
         type: String,
         required: true
     },
-
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    
     // Essential
     isDeveloper: {
         type: Boolean,
@@ -24,22 +31,38 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-
+    
+    // Premium
+    premiumDate: {
+        type: Date,
+        default: 0
+    },
+    premiumDuration: {
+        type: Number,
+        default: 0
+    },
+    
+    // Level
+    xp: {
+        type: Number,
+        default: 0
+    },
+    level: {
+        type: Number,
+        default: 1
+    },
+    
     // Economy
     wallet: {
         type: Number,
-        default: 310
+        default: 100
     },
     bank: {
         type: Number,
         default: 0
-    },
-    lastDaily: {
-        type: Number
     }
 })
-const userSchemaData = mongoose.model("Users", userSchema)
 
-module.exports = {
-    userSchemaData
-}
+const userSchema = mongoose.model("Users", user)
+
+module.exports = { userSchema }
