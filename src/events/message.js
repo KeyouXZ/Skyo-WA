@@ -1,6 +1,5 @@
 const client = require("../index.js");
-const { config } = require("../../utils/bot.js");
-const axios = require("axios")
+const { config, logger, ai } = require("../../utils/bot.js");
 const prefixes = client.prefix;
 
 // User state
@@ -35,23 +34,15 @@ client.on("message", async (message) => {
     if (client.userState.has(number)) {
         if (client.userState.get(number) == "chatbot") {
             if (prefix) {
-                if (cmd == "bot") {
+                if (cmd == "groq") {
                     return command.run(client, message, args, chat);
-    
-                } else if (cmd != "bot") {
-                    return await chat.sendMessage("You currently in chat bot state, using \"" + client.prefix[0] + "bot\" to exit current state")
+        
+                } else if (cmd != "groq") {
+                    return await chat.sendMessage("Kamu sedang di state groq, gunakan \"" + client.prefix[0] + "groq\" untuk keluar dari state ini!")
                 }
             } else {
-
-                const cai_api = process.env.CAI_API;
-		const cai_password = process.env.CAI_PASSWORD;
-		const cai_message = message.body;
-                
-                await axios.post(cai_api, {password: cai_password, message: cai_message}).then(async response => {
-		    let result = response.data.text
-		    if (result.includes("```")) result.replace("```", "")
-                    return await chat.sendMessage(result);
-                })
+                const result = await ai.groq(message.body, chat.lastMessage.from.replace("@c.us", ""))
+                await chat.sendMessage(result)
             }
         }
     } else {
@@ -73,6 +64,10 @@ client.on("message", async (message) => {
     }
 
     // Run command
+    
+    client.msg = {
+        number: await chat.lastMessage.from.replace("@c.us", ""),
+    }
 	command.run(client, message, args, chat);
 
 });

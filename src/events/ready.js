@@ -1,9 +1,9 @@
 const client = require('../index');
 const chalk = require("chalk");
-const { config } = require("../../utils/bot")
+const { config, logger } = require("../../utils/bot")
 
-client.on("ready", () => {
+client.on("ready", async () => {
     const timestamp = new Date().toLocaleString('en-US', { hour12: false }).replace(',', '');
 
-    console.log(chalk.gray(`[${timestamp}]`), chalk.blue.bold(`INFO`), `Connected to`, chalk.yellow(config["phoneNumber"]));
+    logger.info(`Connected to%%`, config["phoneNumber"] + "%%");
 });

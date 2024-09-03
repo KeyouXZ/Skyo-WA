@@ -2,6 +2,10 @@ require("dotenv").config();
 const chalk = require("chalk");
 const { userSchema } = require("../database/schema")
 const timestamp = new Date().toLocaleString("en-US", { hour12: false }).replace(",", "");
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const { ChatGroq } = require("@langchain/groq");
 
 const database = {
     createUser: async function (ID, name, username, password) {
@@ -141,13 +145,120 @@ const config = {
     "phoneNumber": process.env.COUNTRYCODE + process.env.NUMBER,
     "prefix": [`${process.env.PREFIX}`, "!"],
     "developer": ["Keyou"],
-    "currency": "Kc."
+    "currency": "Sc."
 };
+
+const logger = {
+    info: function(...message) {
+        const fixedMessage = message.join(" ").replace(/%%(.*?)%%/g, (_, match) => chalk.yellow.bold(match));
+        return console.log(chalk.gray(`[${timestamp}]`), chalk.blue.bold(`INFO`), fixedMessage)
+    },
+    error: function(...message) {
+        message = message.join(" ")
+        console.log(chalk.gray(`[${timestamp}]`), chalk.red.bold(`ERROR`), chalk.red(message));
+    },
+    warn: function(...message) {
+        message = message.join(" ")
+        console.log(chalk.gray(`[${timestamp}]`), chalk.yellow.bold(`WARN`), chalk.yellow(message));
+    }
+}
+    
+const ai = {
+    groq: async function (message, userId) {
+        const chatHistoryFile = path.join('.data/chatHistory.json');
+        const llm = new ChatGroq({
+            groqApiKey: config.get("GROQ_API_KEY"),
+            model: "mixtral-8x7b-32768",
+            temperature: 1,
+            maxTokens: undefined,
+            maxRetries: 2,
+        });
+
+        let chatHistory = [];
+
+        if (fs.existsSync(chatHistoryFile)) {
+            const data = fs.readFileSync(chatHistoryFile, 'utf8');
+            const allChatHistories = JSON.parse(data);
+            chatHistory = allChatHistories[userId] || [];
+        }
+
+        // Ensure message content is a string
+        if (typeof message !== 'string') {
+            throw new Error('Message must be a string');
+        }
+
+        chatHistory.push({ role: 'user', content: message });
+
+        try {
+            const formattedHistory = chatHistory.map(({ role, content }) => {
+                if (typeof content === 'object') {
+                    if (content.kwargs && typeof content.kwargs.content === 'string') {
+                        content = content.kwargs.content;
+                    } else {
+                        content = JSON.stringify(content);
+                    }
+                }
+                if (typeof content !== 'string') {
+                    logger.warn('Non-string message content detected:', content);
+                    content = '';
+                }
+                return [role, content];
+            });
+
+            // Generate AI response
+            const aiMsg = await llm.invoke([
+                ...formattedHistory,
+                ["human", message],
+            ]);
+
+            chatHistory.push({ role: 'assistant', content: aiMsg });
+
+            let allChatHistories = {};
+            if (fs.existsSync(chatHistoryFile)) {
+                const data = fs.readFileSync(chatHistoryFile, 'utf8');
+                allChatHistories = JSON.parse(data);
+            }
+
+            allChatHistories[userId] = chatHistory;
+
+            fs.writeFileSync(chatHistoryFile, JSON.stringify(allChatHistories, null, 2));
+
+            return aiMsg["content"];
+        } catch (error) {
+            logger.error('Error:', error);
+            return "Failed to contact the API";
+        }
+    },
+
+    flux: async function (message, phoneNumber) {
+        const API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev";
+        
+        const headers = {
+            "Authorization": `Bearer ${config.get("FLUX_API_KEY")}`
+        };
+
+        try {
+            const response = await axios.post(API_URL, { inputs: message }, { headers, responseType: 'arraybuffer' });
+            const timestamp = Date.now();
+            const fileName = `${timestamp}${phoneNumber}-image.png`;
+            const imagePath = path.join('.data', fileName);
+
+            fs.mkdirSync('.data', { recursive: true });
+            fs.writeFileSync(imagePath, response.data);
+
+            return imagePath;
+        } catch (error) {
+            return null;
+        }
+    }
+}
 
 module.exports = {
     readline,
     config,
     util,
     database,
-    cooldowns
+    cooldowns,
+    logger,
+    ai
 };

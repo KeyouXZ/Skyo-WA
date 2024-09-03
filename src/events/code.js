@@ -1,8 +1,12 @@
 const client = require("../index");
 const chalk = require("chalk");
+const { config, logger } = require("../../utils/bot");
+const qrcode = require('qrcode-terminal');
 
-client.on('code', (code) => {
+client.on('qr', (qr) => {
     const timestamp = new Date().toLocaleString('en-US', { hour12: false }).replace(',', '');
-        
-    console.log(chalk.gray(`[${timestamp}]`), chalk.blue.bold(`INFO`), `Pairing code:`, chalk.yellow(code));
+    
+    logger.info('Generating QR Code...')
+
+    qrcode.generate(qr, { small: true });
 });

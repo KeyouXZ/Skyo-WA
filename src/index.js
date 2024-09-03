@@ -13,15 +13,14 @@ const client = new Client({
         clientId: "client"
     }),
     // Using pairing code for linking
-    linkingMethod: new LinkingMethod({
-        phone: {
-            number: config["phoneNumber"]
-        }
-    }),
+    // linkingMethod: new LinkingMethod({
+    //     phone: {
+    //         number: config["phoneNumber"]
+    //     }
+    // }),
     puppeteer: {
         headless: true,
-        executablePath: '/usr/bin/google-chrome-stable'
-    },
+    }
 });
 
 // Define some variable
@@ -29,6 +28,7 @@ client.prefix = config["prefix"];
 client.commands = new Map();
 client.aliases = new Map();
 
+client.msg = {}
 client.cooldown = new Map();
 client.premium = new Map();
 client.dev = new Map();
