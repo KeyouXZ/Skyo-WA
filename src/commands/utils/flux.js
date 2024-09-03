@@ -17,7 +17,7 @@ module.exports = {
         }
 
         const location = await ai.flux(msg, client.msg["number"]);
-        const media = MessageMedia.fromFilePath(location, { unsafeMime: true });
+        const media = MessageMedia.fromFilePath(location);
 
         await chat.sendMessage(media, { caption: msg });
         cooldowns.set(client, message)

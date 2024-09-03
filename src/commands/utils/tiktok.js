@@ -1,6 +1,7 @@
 const { MessageMedia } = require("whatsapp-web.js")
 const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 
 const { exec } = require('child_process');
 const util = require('util');
@@ -21,7 +22,7 @@ module.exports = {
     cooldown: 15,
     usage: ["<url>", "<url> hd", "<url> musiconly"],
     run: async (client, message, args, chat) => {
-        const api = "https://api.nyx.my.id/dl/tiktok?url="
+        const api = "https://api.nyxs.pw/dl/tiktok?url="
         
         // Check api 
         if (!fetch(api)) {
@@ -31,13 +32,14 @@ module.exports = {
         // Get URL & Option
         const url = args[0];
         if (!url) return await message.reply("URL cannot be empty!")
+
+        fs.mkdirSync('.data/tiktok', { recursive: true });
+        filePath = path.join(`.data/tiktok/${client.msg["number"]}#${Math.floor(Math.random() * 1000000)}`)
         
         const opt = args[1];
         let mode = "normal"
         if (!opt) {
             mode = "normal"
-        } else if (opt == "hd") {
-            mode = "hd"
         } else if (opt == "musiconly") {
             mode = "music"
         } else {
@@ -53,25 +55,16 @@ module.exports = {
                 return await message.reply("Couldn't get tiktok video by given URL")
             }
             
-            const dirPath = "./local/tiktok"
-            let filePath = dirPath + "/" + await chat.lastMessage.from.replace("@c.us", "") + "#" + Math.floor(Math.random() * 99999)
-            
             if (mode == "normal") {
-                filePath += ".mp3"
-                await downloadVideo(data["result"]["video1"], filePath)
-                
-                const media = MessageMedia.fromFilePath(filePath, { unsafeMime: true })
+                filePath += ".mp4"
+                await downloadVideo(data["result"]["video"], filePath)
+
+                const media = MessageMedia.fromFilePath(filePath)
                 return await chat.sendMessage(media, { caption: `Author: ${data["result"]["author"]["nickname"]}\nDescription: ${data["result"]["desc"]}`})
-            } else if (mode == "hd") {
-                filePath += ".mp3"
-                await downloadVideo(data["result"]["video_hd"], filePath)
-                
-                const media = MessageMedia.fromFilePath(filePath, { unsafeMime: true })
-                return await chat.sendMessage(media)
             } else if (mode == "music") {
                 filePath += ".mp3"
                 await downloadVideo(data["result"]["music"], filePath)
-                const media = MessageMedia.fromFilePath(filePath, { unsafeMime: true })
+                const media = MessageMedia.fromFilePath(filePath)
                 return await chat.sendMessage(media)
             }
         } catch (err) {

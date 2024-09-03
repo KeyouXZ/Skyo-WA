@@ -12,14 +12,9 @@ const client = new Client({
         dataPath: './local/auth',
         clientId: "client"
     }),
-    // Using pairing code for linking
-    // linkingMethod: new LinkingMethod({
-    //     phone: {
-    //         number: config["phoneNumber"]
-    //     }
-    // }),
+
     puppeteer: {
-        headless: true,
+        headless: true
     }
 });
 
