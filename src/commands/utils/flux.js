@@ -1,4 +1,4 @@
-const { cooldowns } = require("../../../utils/bot");
+const { cooldowns, logger } = require("../../../utils/bot");
 const { MessageMedia } = require('whatsapp-web.js');
 const { ai } = require("../../../utils/bot");
 const path = require("path");
@@ -16,7 +16,10 @@ module.exports = {
             return await chat.sendMessage("Prompt tidak boleh kosong");
         }
 
+        chat.sendMessage("Memproses...")
         const location = await ai.flux(msg, client.msg["number"]);
+        if (!location) return chat.sendMessage("Terjadi kesalahan, silahkan coba lagi nanti")
+
         const media = MessageMedia.fromFilePath(location);
 
         await chat.sendMessage(media, { caption: msg });

@@ -41,7 +41,7 @@ client.on("message", async (message) => {
                     return await chat.sendMessage("Kamu sedang di state groq, gunakan \"" + client.prefix[0] + "groq\" untuk keluar dari state ini!")
                 }
             } else {
-                const result = await ai.groq(message.body, chat.lastMessage.from.replace("@c.us", ""))
+                const result = await ai.groq(message.body, number)
                 await chat.sendMessage(result)
             }
         }
@@ -66,7 +66,7 @@ client.on("message", async (message) => {
     // Run command
     
     client.msg = {
-        number: await chat.lastMessage.from.replace("@c.us", ""),
+        number,
     }
 	command.run(client, message, args, chat);
 

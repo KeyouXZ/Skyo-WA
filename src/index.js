@@ -14,7 +14,8 @@ const client = new Client({
     }),
 
     puppeteer: {
-        headless: true
+        headless: true,
+        executablePath: process.env.CHROME_PATH || null,
     }
 });
 

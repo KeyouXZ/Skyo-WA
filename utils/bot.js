@@ -2,7 +2,6 @@ require("dotenv").config();
 const chalk = require("chalk");
 const { userSchema } = require("../database/schema")
 const timestamp = new Date().toLocaleString("en-US", { hour12: false }).replace(",", "");
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { ChatGroq } = require("@langchain/groq");
@@ -229,25 +228,32 @@ const ai = {
             return "Failed to contact the API";
         }
     },
-
     flux: async function (message, phoneNumber) {
-        const API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev";
-        
-        const headers = {
-            "Authorization": `Bearer ${config.get("FLUX_API_KEY")}`
-        };
-
         try {
-            const response = await axios.post(API_URL, { inputs: message }, { headers, responseType: 'arraybuffer' });
+            const response = await fetch(
+                "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev",
+                {
+                    headers: {
+                        Authorization: `Bearer ${config.get("FLUX_API_KEY")}`,
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ "inputs": message?.toString() }),
+                }
+            );
+            const preResult = await response.arrayBuffer();
+            const result = Buffer.from(preResult);       
+
             const timestamp = Date.now();
             const fileName = `${timestamp}${phoneNumber}-image.png`;
-            const imagePath = path.join('.data', fileName);
+            const imagePath = path.join('.data', 'flux', fileName)
 
-            fs.mkdirSync('.data', { recursive: true });
-            fs.writeFileSync(imagePath, response.data);
+            fs.mkdirSync('.data/flux', { recursive: true });
+            fs.writeFileSync(imagePath, result);
 
             return imagePath;
         } catch (error) {
+            logger.error(error);
             return null;
         }
     }

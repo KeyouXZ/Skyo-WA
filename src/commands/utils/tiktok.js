@@ -22,7 +22,7 @@ module.exports = {
     cooldown: 15,
     usage: ["<url>", "<url> hd", "<url> musiconly"],
     run: async (client, message, args, chat) => {
-        const api = "https://api.nyxs.pw/dl/tiktok?url="
+        const api = "https://api.tiklydown.eu.org/api/download/v2?url="
         
         // Check api 
         if (!fetch(api)) {
@@ -51,17 +51,17 @@ module.exports = {
             const response = await fetch(api + url)
             const data = await response.json()
             
-            if (await data["status"] == "false") {
+            if (await data["status"] != 200) {
                 return await message.reply("Couldn't get tiktok video by given URL")
             }
             
-            if (mode == "normal") {
+            if (mode == "normal" && data["result"]["type"] == "video") {
                 filePath += ".mp4"
-                await downloadVideo(data["result"]["video"], filePath)
+                await downloadVideo(data["result"]["video1"], filePath)
 
                 const media = MessageMedia.fromFilePath(filePath)
-                return await chat.sendMessage(media, { caption: `Author: ${data["result"]["author"]["nickname"]}\nDescription: ${data["result"]["desc"]}`})
-            } else if (mode == "music") {
+                return await chat.sendMessage(media, { caption: `Pembuat: ${data["result"]["author"]["nickname"]}\nDeskripsi: ${data["result"]["desc"]}`})
+            } else if (mode == "music" && data["result"]["type"] == "video") {
                 filePath += ".mp3"
                 await downloadVideo(data["result"]["music"], filePath)
                 const media = MessageMedia.fromFilePath(filePath)
