@@ -7,8 +7,6 @@ module.exports = {
         if (await cooldowns.has(client, message)) { return; }
 
         cooldowns.set(client, message)
-        await message.reply(" Pong")
-        const name = await message.getMentions();
-        console.log(await chat.lastMessage.from.replace("@c.us", ""))
+        await message.reply("Pong")
     }
 }

@@ -9,7 +9,7 @@ module.exports = {
         if (state == "chatbot") {
             client.userState.set(client.msg.number, 'none')
 
-            const chatHistoryFile = path.join('local/chatHistory.json');
+            const chatHistoryFile = path.join('.data/chatHistory.json');
 
             const userId = client.msg["number"]
             if (fs.existsSync(chatHistoryFile)) {
@@ -26,7 +26,6 @@ module.exports = {
             return await chat.sendMessage("Keluar dari groq state")
         } else {
             client.userState.set(client.msg.number, "chatbot")
-
 
             return await chat.sendMessage("Groq state diaktifkan, kamu bisa berbicara dengan groq sekarang")
         }

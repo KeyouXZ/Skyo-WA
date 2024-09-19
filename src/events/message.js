@@ -9,7 +9,9 @@ client.on("message", async (message) => {
     // Chat
     const chat = await message.getChat();
     // Number
-    const number = await chat.lastMessage.from.replace("@c.us", "");
+    const number = chat.lastMessage.author.replace("@c.us", "");
+    const _grup = chat.lastMessage.from || "";
+    const grup = _grup.includes("@g.us") ? _grup.replace("@g.us", "") : null
 
     // Prefixes
     const prefix = prefixes.find(p => message.body.startsWith(p));
@@ -67,6 +69,7 @@ client.on("message", async (message) => {
     
     client.msg = {
         number,
+        grup
     }
 	command.run(client, message, args, chat);
 
