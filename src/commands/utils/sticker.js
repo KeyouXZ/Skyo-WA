@@ -1,4 +1,4 @@
-const { cooldowns } = require("../../../utils/bot")
+const { cooldowns, logger } = require("../../../utils/bot")
 
 module.exports = {
     name: "sticker",
@@ -15,18 +15,19 @@ module.exports = {
             if (target.hasMedia) {    
                 const media = await target.downloadMedia();            
                 // Handle sticker name, author
-                const stickerName = args[0];
-                const stickerAuthor = args[1];
-                if (!stickerName) {
-                    return await chat.sendMessage("Masukan nama stiker");
-                } else if (!stickerAuthor) {
-                    return await chat.sendMessage("Masukan pembuat stiker");
-                }
+                const stickerName = args[0] || (Math.random() + 1).toString(36).substring(7);
+                const stickerAuthor = args[1] || client.number + " Generated";
 
                 // Check if the media is an image or video
                 if (media?.mimetype.startsWith('video')) {
                     // Send the sticker
-                    return chat.sendMessage("Video ke stiker tidak di support")
+                    cooldowns.set(client, message);
+                    return await chat.sendMessage(media, {
+                        sendMediaAsSticker: true,
+                        stickerAuthor,
+                        stickerName,
+                        isAnimated: true
+                    });
 
                 } else if (media?.mimetype.startsWith('image')) {
                     cooldowns.set(client, message)
@@ -45,6 +46,8 @@ module.exports = {
             }
         } catch (error) {
             // Handle errors
+            logger.error(error);
+            if (error.toString().includes("ffmpeg")) return chat.sendMessage("Video ke stiker tidak tersedia!")
             chat.sendMessage("Error saat memproses command stiker. silahkan coba lagi nanti!");
         }
     }

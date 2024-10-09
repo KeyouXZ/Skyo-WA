@@ -141,7 +141,6 @@ const config = {
         }
         return process.env[env];
     },
-    "phoneNumber": process.env.COUNTRYCODE + process.env.NUMBER,
     "prefix": [`${process.env.PREFIX}`, "!"],
     "developer": ["Keyou"],
     "currency": "Sc."

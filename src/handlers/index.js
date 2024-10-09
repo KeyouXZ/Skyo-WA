@@ -46,15 +46,17 @@ module.exports = async (client) => {
     logger.info(`%%${client.commands.size}%% commands loaded`)
 
      // Load MongoDB
-    mongoose.set('strictQuery', false);
-    try {
-        logger.info("Connecting to MongoDB")
-        await mongoose.connect(url)
-        .then(c => {
-             logger.info("Connected to MongoDB")
-        });
-    } catch (err) {
-        logger.error("Failed to connect to MongoDB", err.msg, err.stack)
-        process.exit(1);
+    if (process.env.MONGO_URL) {
+        mongoose.set('strictQuery', false);
+        try {
+            logger.info("Connecting to MongoDB")
+            await mongoose.connect(url)
+            .then(c => {
+                logger.info("Connected to MongoDB")
+            });
+        } catch (err) {
+            logger.error("Failed to connect to MongoDB", err.msg, err.stack)
+            process.exit(1);
+        }
     }
 };
