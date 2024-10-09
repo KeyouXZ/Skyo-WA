@@ -1,5 +1,4 @@
 const { MessageMedia } = require("whatsapp-web.js")
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
@@ -20,18 +19,18 @@ module.exports = {
     name: "tiktok",
     description: "Download TikTok Video without watermark",
     cooldown: 15,
-    usage: ["<url>", "<url> hd", "<url> musiconly"],
+    usage: ["<url>", "<url> audio"],
     run: async (client, message, args, chat) => {
         const api = "https://api.tiklydown.eu.org/api/download/v2?url="
         
         // Check api 
         if (!fetch(api)) {
-            return await message.reply("API not found, please DM Developer for more information!")
+            return await message.reply("API Error. Hubungi developer jika berkenan!")
         }
         
         // Get URL & Option
         const url = args[0];
-        if (!url) return await message.reply("URL cannot be empty!")
+        if (!url) return await message.reply("URL tidak boleh kosong!")
 
         fs.mkdirSync('.data/tiktok', { recursive: true });
         filePath = path.join(`.data/tiktok/${client.msg["number"]}#${Math.floor(Math.random() * 1000000)}`)
@@ -40,11 +39,13 @@ module.exports = {
         let mode = "normal"
         if (!opt) {
             mode = "normal"
-        } else if (opt == "musiconly") {
+        } else if (opt == "audio") {
             mode = "music"
         } else {
-            return await  message.reply("Invalid option " + opt)
+            return await  message.reply("Opsi tidak tersedia: " + opt)
         }
+        
+        await message.reply("Memproses...")
         
         // Request to API
         try {
@@ -52,7 +53,7 @@ module.exports = {
             const data = await response.json()
             
             if (await data["status"] != 200) {
-                return await message.reply("Couldn't get tiktok video by given URL")
+                return await message.reply("Video tiktok tidak ditemukan")
             }
             
             if (mode == "normal" && data["result"]["type"] == "video") {

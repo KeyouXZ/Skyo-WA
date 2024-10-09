@@ -244,8 +244,7 @@ const ai = {
             const preResult = await response.arrayBuffer();
             const result = Buffer.from(preResult);       
 
-            const timestamp = Date.now();
-            const fileName = `${timestamp}${phoneNumber}-image.png`;
+            const fileName = `${phoneNumber}#${Math.floor(Math.random() * 1000000)}.png`;
             const imagePath = path.join('.data', 'flux', fileName)
 
             fs.mkdirSync('.data/flux', { recursive: true });
