@@ -33,14 +33,15 @@ const cooldowns = {
         let cooldownTime = client.commands.get(args).cooldown * 1000 || 15 * 1000
 
         // Set cooldown
-        client.cooldown.set(await message.getMentions().number, Date.now() + cooldownTime)
+        client.cooldown.set(client.msg["number"], Date.now() + cooldownTime)
     },
     has: async function(client, message) {
-        const expirationTime = client.cooldown.get(await message.getMentions().number) || 0;
+        const expirationTime = client.cooldown.get(client.msg["number"]) || 0;
         // Check cooldown
         if (Date.now() < expirationTime) {
             const timeLeft = (expirationTime - Date.now()) / 1000
-            await message.reply(`⏱ | Please wait and try the command again *in ${timeLeft.toFixed()} seconds*`)
+            await message.reply(`⏱ | Harap tunggu dan coba perintahnya lagi *dalam ${timeLeft.toFixed()} detik*`)
+
             .then(msg => {
                 setTimeout(async () => {
                    await msg.delete(true);
