@@ -8,6 +8,15 @@ client.userState = new Map();
 client.on("message", async (message) => {
     // Chat
     const chat = await message.getChat();
+
+    // Exstra protection
+    const messageDate = new Date(message.timestamp * 1000); 
+    const now = new Date();
+
+    if (messageDate < now - (10 * 1000)) {
+        return;
+    }
+
     // Number
     const _last = chat.lastMessage.from
     const number = _last.includes("@c.us") ? _last.replace("@c.us", "") : chat.lastMessage.author.replace("@c.us", "");
@@ -28,7 +37,7 @@ client.on("message", async (message) => {
     }
 
     // Commands 1
-    const cmd = args.shift().toLowerCase();
+    const cmd = args.shift()?.toLowerCase();
     if (cmd.length == 0) return;
     let command = client.commands.get(cmd);
 
