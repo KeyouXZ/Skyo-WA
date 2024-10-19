@@ -23,6 +23,7 @@
   "homepage": "https://github.com/KeyouXZ/Skyo-WA#readme",
   "dependencies": {
     "@langchain/groq": "^0.0.17",
+    "@tobyg74/tiktok-api-dl": "^1.2.0",
     "axios": "^1.6.7",
     "chalk": "^4.1.2",
     "dotenv": "^16.4.5",

@@ -1,10 +1,27 @@
 const { MessageMedia } = require("whatsapp-web.js")
 const fs = require('fs');
 const path = require('path');
+const { cooldowns, logger } = require("../../../utils/bot")
 
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
+
+const Tiktok = require("@tobyg74/tiktok-api-dl")
+
+const getTiktokData = async (url, ver) => {
+    try {
+        const result = await Tiktok.Downloader(url, {
+            version: ver ? ver : "v3",
+            proxy: "http"
+        });
+        return result;
+    } catch (error) {
+        logger.error('Error fetching TikTok data:', error);
+    }
+};
+
+
 
 const downloadVideo = async (url, path) => {
     try {
@@ -21,12 +38,8 @@ module.exports = {
     cooldown: 15,
     usage: ["<url>", "<url> audio"],
     run: async (client, message, args, chat) => {
-        const api = "https://api.tiklydown.eu.org/api/download/v2?url="
-        
-        // Check api 
-        if (!fetch(api)) {
-            return await message.reply("API Error. Hubungi developer jika berkenan!")
-        }
+
+        if (await cooldowns.has(client, message)) { return; }
         
         // Get URL & Option
         const url = args[0];
@@ -39,6 +52,8 @@ module.exports = {
         let mode = "normal"
         if (!opt) {
             mode = "normal"
+        } else if (opt == "hd") {
+            mode = "hd"
         } else if (opt == "audio") {
             mode = "music"
         } else {
@@ -49,24 +64,39 @@ module.exports = {
         
         // Request to API
         try {
-            const response = await fetch(api + url)
-            const data = await response.json()
+            const data = await getTiktokData(url)
             
-            if (await data["status"] != 200) {
+            if (data["status"] != "success") {
                 return await message.reply("Video tiktok tidak ditemukan")
             }
             
-            if (mode == "normal" && data["result"]["type"] == "video") {
+            // Music
+            let data1;
+            if (mode == "music") {
+                data1 = await getTiktokData(url, "v1")
+            }
+            if (mode == "music" && data1["status"] != "success") {
+                return await message.reply("Video tiktok tidak ditemukan")
+            }
+
+            const videoRes = mode == "hd" ? data["result"]["videoHD"] : data["result"]["videoSD"]
+            if (mode == "normal" && data["result"]["type"] == "video" && videoRes) {
                 filePath += ".mp4"
-                await downloadVideo(data["result"]["video1"], filePath)
+                await downloadVideo(videoRes, filePath)
 
                 const media = MessageMedia.fromFilePath(filePath)
+                await cooldowns.set(client, message)
+
                 return await chat.sendMessage(media, { caption: `Pembuat: ${data["result"]["author"]["nickname"]}\nDeskripsi: ${data["result"]["desc"]}`})
-            } else if (mode == "music" && data["result"]["type"] == "video") {
+            } else if (mode == "music" && data1["result"]["type"] == "video" && data1["result"]["music"]["playUrl"]) {
                 filePath += ".mp3"
-                await downloadVideo(data["result"]["music"], filePath)
+                await downloadVideo(data1["result"]["music"]["playUrl"], filePath)
                 const media = MessageMedia.fromFilePath(filePath)
+                await cooldowns.set(client, message)
+
                 return await chat.sendMessage(media)
+            } else {
+                return await message.reply("Tidak tersedia untuk saat ini!")
             }
         } catch (err) {
             await chat.sendMessage(err)
